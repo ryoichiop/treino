@@ -1,0 +1,717 @@
+<title>Treino — Hipertrofia (Braço Prioridade)</title>
+<style>
+  :root{
+    --bg:#F5F7FA; --surface:#FFFFFF; --surface-2:#EDF1F6; --line:#DBE1EA;
+    --ink:#161E2C; --muted:#5C6879; --faint:#8A96A6;
+    --navy:#1E3050; --navy-ink:#FFFFFF;
+    --gold:#9A6B12; --gold-bg:#FBF1DC; --gold-line:#E6CF9B;
+    --strength:#1F6B57; --strength-bg:#E1F0EB;
+    --err:#B23A48;
+    --radius:14px; --maxw:920px;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color-scheme:light;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:20px 16px 64px}
+  a{color:var(--gold)} a:hover{text-decoration:underline}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+
+  .hd .eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .hd h1{font-size:clamp(1.5rem,4.4vw,2.05rem);line-height:1.1;margin:.25em 0 .3em;letter-spacing:-.01em;text-wrap:balance}
+  .hd p{color:var(--muted);margin:0;max-width:62ch;font-size:.94rem}
+  .star{color:var(--gold)}
+
+  .tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;overflow-x:auto;
+    margin:16px -16px 0;padding:10px 16px;background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);scrollbar-width:thin}
+  .tab{flex:0 0 auto;font:inherit;font-size:.85rem;font-weight:600;color:var(--muted);background:var(--surface);
+    border:1px solid var(--line);padding:8px 15px;border-radius:999px;white-space:nowrap;cursor:pointer}
+  .tab.is-active{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+
+  .panel[hidden]{display:none}
+  .panel{padding-top:18px}
+
+  .golden{background:var(--gold-bg);border:1px solid var(--gold-line);border-radius:var(--radius);
+    padding:13px 16px;font-size:.92rem;color:var(--ink);margin-bottom:14px}
+  .golden b{color:var(--gold)}
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:14px}
+  .lg{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px}
+  .lg h3{margin:0 0 4px;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .lg p{margin:0;font-size:.86rem;color:var(--muted)} .lg b{color:var(--ink)}
+  .pick{margin-top:6px;font-size:.95rem;color:var(--muted)} .pick b{color:var(--ink)}
+  .daygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .daycard{text-align:left;font:inherit;cursor:pointer;background:var(--surface);border:1px solid var(--line);
+    border-left:3px solid var(--navy);border-radius:12px;padding:12px 14px;color:var(--ink)}
+  .daycard .n{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .daycard .t{display:block;font-weight:700;margin-top:2px;font-size:.95rem}
+
+  .daybar{display:flex;align-items:baseline;gap:10px;background:var(--navy);color:var(--navy-ink);
+    border-radius:12px;padding:12px 16px;margin-bottom:12px}
+  .daybar .n{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.82;font-weight:700}
+  .daybar h2{margin:0;font-size:1.06rem;font-weight:700}
+  .daybar .sub{font-weight:400;opacity:.82;font-size:.92em}
+
+  .ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 15px;margin-bottom:11px}
+  .ex__head{display:flex;align-items:flex-start;gap:11px}
+  .ex__check{flex:0 0 auto;width:23px;height:23px;margin-top:1px;border-radius:50%;border:2px solid var(--line);
+    background:transparent;cursor:pointer;position:relative}
+  .ex__check::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--strength);transform:scale(0);transition:transform .12s ease}
+  @media (prefers-reduced-motion:reduce){.ex__check::after{transition:none}}
+  .ex.is-done .ex__check{border-color:var(--strength)} .ex.is-done .ex__check::after{transform:scale(1)}
+  .ex__name{margin:0;font-size:1rem;font-weight:700;line-height:1.3;flex:1}
+  .ex.is-done .ex__name{color:var(--faint);text-decoration:line-through}
+  .ex.is-done{opacity:.72}
+  .badge{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    vertical-align:middle;padding:2px 6px;border-radius:5px;margin-left:5px;color:var(--strength);background:var(--strength-bg)}
+  .ex__meta{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0 34px}
+  .chip{display:inline-flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:4px 9px}
+  .chip .k{font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:700}
+  .chip .v{font-size:.9rem;font-weight:700;color:var(--ink);line-height:1.2}
+  .ex__body{margin:12px 0 0 34px}
+  .lbl{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--navy);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:2px 7px;margin-right:7px}
+  .lbl--err{color:var(--err)}
+  .ex__setup{font-size:.87rem;color:var(--muted);margin:0 0 8px} .ex__setup b{color:var(--ink)}
+  .ex__steps{margin:0 0 8px;padding-left:0;list-style:none;counter-reset:st}
+  .ex__steps li{counter-increment:st;position:relative;padding:3px 0 3px 30px;font-size:.88rem;color:var(--ink)}
+  .ex__steps li::before{content:counter(st);position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:50%;
+    background:var(--navy);color:var(--navy-ink);font-size:.68rem;font-weight:800;display:grid;place-items:center}
+  .ex__err{font-size:.85rem;color:var(--muted);margin:8px 0 0} .ex__err b{color:var(--ink)}
+  @media (max-width:520px){.ex__meta,.ex__body{margin-left:0}.chip{flex:1 1 auto}}
+
+  .prog h2,.gloss h2{font-size:1.15rem;margin:0 0 4px} .prog>p,.gloss>p{color:var(--muted);font-size:.9rem;margin:0 0 14px;max-width:64ch}
+  .ladder{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px}
+  .ladder h3{margin:0 0 10px;font-size:.95rem;display:flex;align-items:center;gap:8px}
+  .ladder h3 .t{font-size:.62rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);
+    background:var(--gold-bg);border:1px solid var(--gold-line);padding:2px 7px;border-radius:5px}
+  .steps{display:flex;flex-wrap:wrap;gap:7px;list-style:none;margin:0;padding:0;counter-reset:s}
+  .steps li{counter-increment:s;display:flex;align-items:center;gap:7px;font-size:.84rem;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:8px;padding:6px 11px}
+  .steps li::before{content:counter(s);display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--navy);color:var(--navy-ink);font-size:.68rem;font-weight:800}
+  .steps li:last-child{background:var(--gold-bg);border-color:var(--gold-line)} .steps li:last-child::before{background:var(--gold)}
+
+  .gloss__grp{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:18px 0 8px}
+  .terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:0}
+  .term{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;border-left:3px solid var(--gold)}
+  .term dt{font-weight:700;font-size:.9rem;margin-bottom:3px} .term dd{margin:0;font-size:.85rem;color:var(--muted)} .term dd b{color:var(--ink)}
+
+  .foot{margin-top:26px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.85rem}
+  .foot h3{color:var(--ink);font-size:.9rem;margin:0 0 4px} .foot .row{margin-bottom:12px} .foot b{color:var(--ink)}
+  .foot .src{font-size:.8rem;color:var(--faint)} .reset{font-weight:600;cursor:pointer}
+</style>
+
+<div class="wrap">
+  <header class="hd">
+    <div class="eyebrow">Hipertrofia · 5× por semana</div>
+    <h1>Treino — Braço prioridade</h1>
+    <p>Toque num <b>dia</b> abaixo para abrir o treino dele. Cada exercício tem o passo a passo completo, do aparelho à execução. <span class="star">★</span> = posição alongada (maior potencial de hipertrofia).</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Seções">
+    <button class="tab" role="tab" data-p="p-inicio">Início</button>
+    <button class="tab" role="tab" data-p="p-dia1">Dia 1</button>
+    <button class="tab" role="tab" data-p="p-dia2">Dia 2</button>
+    <button class="tab" role="tab" data-p="p-dia3">Dia 3</button>
+    <button class="tab" role="tab" data-p="p-dia4">Dia 4</button>
+    <button class="tab" role="tab" data-p="p-dia5">Dia 5</button>
+    <button class="tab" role="tab" data-p="p-prog">Progressão</button>
+    <button class="tab" role="tab" data-p="p-gloss">Glossário</button>
+  </nav>
+
+  <main>
+  <!-- INÍCIO -->
+  <section class="panel" id="p-inicio" role="tabpanel">
+    <div class="golden"><b>Regra de ouro:</b> controle a descida (2–3 s) buscando o <b>alongamento</b> em cada repetição. Nos exercícios <span class="star">★</span>, ao falhar a amplitude completa, faça algumas parciais na parte alongada.</div>
+    <div class="legend">
+      <div class="lg"><h3>RIR — Reps na reserva</h3><p>Quantas reps sobrariam antes de falhar. <b>0</b>=falha · <b>1</b>=1 sobrando · <b>2–3</b>=2–3 sobrando. Isolamento 0–1 · composto pesado 1–2 · força 2–3.</p></div>
+      <div class="lg"><h3>Descanso</h3><p>Tempo entre séries. Compostos pesados <b>2–3 min</b>; isolamento <b>60–90 s</b>.</p></div>
+      <div class="lg"><h3>Progressão</h3><p>Some reps até o <b>topo</b> da faixa em todas as séries; então <b>aumente a carga</b> (~2,5 kg) e volte ao fundo. Registre carga e reps.</p></div>
+    </div>
+    <p class="pick"><b>Escolha o dia de hoje:</b></p>
+    <div class="daygrid">
+      <button class="daycard" data-go="p-dia1"><span class="n">Dia 1</span><span class="t">Força + Braços</span></button>
+      <button class="daycard" data-go="p-dia2"><span class="n">Dia 2</span><span class="t">Perna (quad) + Bíceps + Lombar</span></button>
+      <button class="daycard" data-go="p-dia3"><span class="n">Dia 3</span><span class="t">Peito + Costas + Ombro</span></button>
+      <button class="daycard" data-go="p-dia4"><span class="n">Dia 4</span><span class="t">Perna (post.) + Tríceps + Lombar</span></button>
+      <button class="daycard" data-go="p-dia5"><span class="n">Dia 5</span><span class="t">Peito + Costas + Braços</span></button>
+    </div>
+  </section>
+
+  <!-- DIA 1 -->
+  <section class="panel" id="p-dia1" role="tabpanel" hidden>
+    <div class="daybar"><span class="n">Dia 1</span><h2>Força + Braços <span class="sub">(braço fresco)</span></h2></div>
+
+    <article class="ex" data-id="d1e1">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Barra fixa supinada (chin-up) <span class="badge">Força</span></h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">5 × prog.</span></span><span class="chip"><span class="k">RIR</span><span class="v">2–3</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barra fixa (horizontal). Sem peso extra no início — se estiver difícil, use elástico ou gráviton (ver Progressão).</p>
+        <ol class="ex__steps">
+          <li>Segure a barra com as <b>palmas viradas pra você</b> (supinada), mãos na largura dos ombros.</li>
+          <li>Pendure com os braços esticados, pés fora do chão; "encaixe" os ombros (longe das orelhas).</li>
+          <li>Puxe o corpo pra cima levando o <b>peito</b> à barra, cotovelos descendo ao lado do corpo.</li>
+          <li>Suba até o <b>queixo passar</b> a barra.</li>
+          <li>Desça devagar (2–3 s) até <b>esticar totalmente</b> os braços.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> balançar as pernas (kipping); não descer até esticar; encolher os ombros.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d1e2">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Paralela (dip) <span class="badge">Força</span></h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × prog.</span></span><span class="chip"><span class="k">RIR</span><span class="v">2–3</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barras paralelas (ou estação de dip / máquina assistida).</p>
+        <ol class="ex__steps">
+          <li>Suba e apoie as mãos nas barras, <b>braços esticados</b> sustentando o corpo.</li>
+          <li>Incline o tronco <b>levemente à frente</b>; ombros longe das orelhas.</li>
+          <li>Dobre os cotovelos descendo o corpo <b>devagar</b> até o braço passar de 90° (alonga peito/tríceps).</li>
+          <li>Empurre pra cima até quase esticar (sem travar bruscamente).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> descer pouco (parcial curta); ombros subindo; descida sem controle.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d1e3">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Rosca inclinada c/ halteres</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco inclinado a <b>45–60°</b> + 2 halteres.</p>
+        <ol class="ex__steps">
+          <li>Sente no banco inclinado, costas apoiadas, um halter em cada mão.</li>
+          <li>Deixe os braços penderem <b>relaxados e atrás da linha do corpo</b> — isso alonga o bíceps (é o ponto do exercício).</li>
+          <li>Sem mexer o ombro, dobre o cotovelo e suba o halter girando o punho (palma pra cima).</li>
+          <li>Aperte no topo por 1 s.</li>
+          <li>Desça controlado até o braço <b>esticar</b> (sinta o alongamento).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> adiantar o cotovelo pra frente; balançar; não descer até alongar.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d1e4">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Tríceps testa (skullcrusher) — barra W</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco reto + barra W (ou halteres). <b>Trocou a extensão overhead</b> (que dava dor no ombro): mesma cabeça longa, mas com o ombro neutro.</p>
+        <ol class="ex__steps">
+          <li>Deite, segure a barra W na largura dos ombros, braços esticados sobre o peito, inclinados um pouco <b>pra trás</b> (não 90° reto).</li>
+          <li>Dobre <b>só os cotovelos</b>, descendo a barra em direção à testa e um pouco <b>atrás da cabeça</b> — isso alonga a cabeça longa do tríceps.</li>
+          <li>Cotovelos apontam pra frente e ficam <b>fixos</b> — só o antebraço se move.</li>
+          <li>Estenda de volta até quase esticar; aperte. Controle a descida buscando o alongamento.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelos abrindo pros lados; mexer o ombro; bater a barra na testa.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d1e5">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Rosca martelo</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 10–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> 2 halteres.</p>
+        <ol class="ex__steps">
+          <li>Em pé, halter em cada mão ao lado do corpo, <b>pegada neutra</b> (polegar pra cima, como segurar um martelo).</li>
+          <li>Cotovelos fixos ao lado; suba o halter <b>mantendo</b> a pegada neutra.</li>
+          <li>Aperte em cima; desça controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> girar o punho; usar impulso do quadril/tronco.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d1e6">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Tríceps pushdown (corda)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">0</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia <b>alta</b> com corda.</p>
+        <ol class="ex__steps">
+          <li>Segure uma ponta da corda em cada mão, de frente pra polia alta.</li>
+          <li>Cotovelos <b>colados ao corpo</b>, tronco levemente inclinado à frente.</li>
+          <li>Estenda os cotovelos empurrando pra baixo; no fim, <b>afaste as pontas</b> da corda.</li>
+          <li>Volte controlado só até o cotovelo a ~90° (sem o ombro subir).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelo saindo do corpo; usar o peso do corpo pra empurrar.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- DIA 2 -->
+  <section class="panel" id="p-dia2" role="tabpanel" hidden>
+    <div class="daybar"><span class="n">Dia 2</span><h2>Perna (quadríceps) + Bíceps + Lombar</h2></div>
+
+    <article class="ex" data-id="d2e1">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Agachamento ou Hack (profundo)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 6–10</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Máquina <b>Hack</b> (mais simples/segura) ou barra no rack.</p>
+        <ol class="ex__steps">
+          <li>No Hack: ombros sob as almofadas, costas no encosto, pés na plataforma na largura dos ombros.</li>
+          <li>Destrave e <b>desça</b> dobrando joelho e quadril até a coxa passar do paralelo (profundo = alongamento).</li>
+          <li>Joelhos <b>acompanham a ponta dos pés</b> (não colapsam pra dentro).</li>
+          <li>Empurre pela plataforma subindo até quase esticar (sem travar o joelho).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> descer pouco; joelho pra dentro; lombar arredondando no fundo.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e2">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Leg press (amplitude completa)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 10–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Leg press (horizontal ou 45°).</p>
+        <ol class="ex__steps">
+          <li>Sente, pés na plataforma na largura dos ombros, quadril e lombar bem apoiados.</li>
+          <li>Destrave; <b>desça</b> a plataforma dobrando os joelhos até quase encostar no peito — <b>sem</b> tirar o quadril do encosto.</li>
+          <li>Empurre de volta sem travar o joelho.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> quadril saindo (lombar curva) no fundo; travar o joelho no topo.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e3">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Cadeira extensora</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Cadeira extensora.</p>
+        <ol class="ex__steps">
+          <li>Sente, costas no encosto, tornozelos atrás do rolo, joelho alinhado ao eixo da máquina.</li>
+          <li>Estenda os joelhos até esticar as pernas; aperte 1 s em cima.</li>
+          <li>Desça controlado; no fim da série, faça parciais na parte de baixo (alongada).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> dar tranco; soltar o peso na descida.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e4">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Panturrilha em pé</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 10–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Máquina de panturrilha em pé (ou Smith com plataforma sob a ponta dos pés).</p>
+        <ol class="ex__steps">
+          <li>Ombros sob as almofadas, <b>ponta dos pés</b> na borda da plataforma, calcanhares livres.</li>
+          <li>Desça o calcanhar até o <b>alongamento máximo</b> (pausa 1 s embaixo).</li>
+          <li>Suba na ponta do pé o mais alto possível; aperte.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> quicar sem amplitude; dobrar muito o joelho.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e7">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Extensão de lombar (back extension)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">90 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco de hiperextensão (romana). Comece com o <b>peso do corpo</b>; depois segure uma anilha no peito pra progredir. Fortalece cadeia posterior, melhora postura e é amiga do ombro.</p>
+        <ol class="ex__steps">
+          <li>Ajuste o apoio das coxas <b>logo abaixo do quadril</b> (o quadril precisa dobrar livre); trave os tornozelos sob os rolos.</li>
+          <li>Braços cruzados no peito (ou segurando uma anilha).</li>
+          <li>Desça o tronco dobrando o <b>quadril</b> (não force a lombar), controlado, até sentir o alongamento atrás.</li>
+          <li>Suba estendendo o quadril até o tronco alinhar com as pernas; em cima, <b>aperte glúteo e abdômen</b>.</li>
+          <li>Controle a descida de novo.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> jogar a lombar pra trás com força no topo (pare no alinhamento); usar impulso. <b>Progrida</b> em reps, depois com anilha (10 → 25 → 45…).</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e5">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Rosca direta com barra W</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barra W (a ondulada) + anilhas.</p>
+        <ol class="ex__steps">
+          <li>Em pé, segure a barra na pegada <b>supinada</b> (palmas pra cima) nos "vales" da barra.</li>
+          <li>Cotovelos <b>fixos ao lado</b> do corpo; suba a barra dobrando os cotovelos.</li>
+          <li>Aperte em cima; desça até <b>esticar bem</b> os braços.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> balançar o tronco; adiantar o cotovelo.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d2e6">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Rosca inversa no cabo</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">2 × 12–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia baixa + barra reta.</p>
+        <ol class="ex__steps">
+          <li>Segure a barra com <b>pegada pronada</b> (palmas pra baixo).</li>
+          <li>Cotovelos ao lado; suba a barra mantendo o <b>punho firme</b> (reto).</li>
+          <li>Desça controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> quebrar/dobrar o punho; usar impulso.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- DIA 3 -->
+  <section class="panel" id="p-dia3" role="tabpanel" hidden>
+    <div class="daybar"><span class="n">Dia 3</span><h2>Peito + Costas + Ombro + Barra</h2></div>
+
+    <article class="ex" data-id="d3e1">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Barra fixa pronada (pull-up) <span class="badge">Força</span></h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × prog.</span></span><span class="chip"><span class="k">RIR</span><span class="v">2–3</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barra fixa. Use elástico/gráviton se precisar (ver Progressão).</p>
+        <ol class="ex__steps">
+          <li>Segure a barra com as <b>palmas pra fora</b> (pronada), um pouco mais aberta que os ombros.</li>
+          <li>Pendure com braços esticados, ombros encaixados.</li>
+          <li>Puxe levando o <b>peito</b> à barra, cotovelos descendo em direção ao quadril.</li>
+          <li>Suba até o queixo passar; desça controlado até esticar.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> meia amplitude; balanço.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d3e2">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Supino inclinado c/ halteres</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 6–10</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco inclinado a <b>30°</b> + 2 halteres.</p>
+        <ol class="ex__steps">
+          <li>Deite no banco a 30° com um halter em cada mão apoiado nas coxas; "chute" as coxas pra levar os halteres à posição.</li>
+          <li>Halteres na altura do peito, cotovelos a <b>~45°</b> do tronco.</li>
+          <li>Desça buscando o <b>alongamento</b> do peito (sem forçar o ombro).</li>
+          <li>Empurre pra cima juntando levemente, <b>sem</b> travar/estender demais no topo.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> descer pouco; travar cotovelos no topo (perde tensão); cotovelos a 90°.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d3e3">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Remada curvada / cavalinho</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barra (remada curvada) ou máquina cavalinho (T-bar).</p>
+        <ol class="ex__steps">
+          <li>Incline o tronco à frente (~45°), <b>coluna neutra e firme</b>, joelhos levemente flexionados.</li>
+          <li>Segure a barra; puxe levando os <b>cotovelos pra trás</b> em direção ao quadril, apertando as escápulas.</li>
+          <li>Desça controlado até esticar os braços.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> puxar só com o braço; arredondar a lombar; reclinar o tronco.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d3e4">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Crucifixo / peck deck (voador)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Máquina peck deck (voador) ou 2 halteres deitado no banco.</p>
+        <ol class="ex__steps">
+          <li>Sente, costas no encosto, segure as pegadas com os braços <b>quase esticados</b>.</li>
+          <li>Abra os braços controlando até sentir o <b>alongamento</b> no peito.</li>
+          <li>Feche os braços juntando à frente (sem "socar"); aperte 1 s.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> dobrar muito o cotovelo (vira supino); não alongar na abertura.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d3e5">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Elevação lateral no cabo</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia baixa + pegador (estribo).</p>
+        <ol class="ex__steps">
+          <li>Fique <b>de lado</b> pra polia; segure o estribo com a mão de fora, o cabo passando pela frente do corpo.</li>
+          <li>Braço quase esticado; <b>suba lateralmente</b> até a altura do ombro (mínimo levemente acima).</li>
+          <li>Desça controlado — a tensão do cabo já pega desde embaixo (alongado).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> usar trapézio/impulso; subir alto demais.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d3e6">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Crucifixo inverso (ombro posterior)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 15–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">0</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Peck deck invertido ou 2 halteres com o tronco inclinado à frente.</p>
+        <ol class="ex__steps">
+          <li>No peck deck invertido: sente <b>de frente</b> pro encosto, segure as pegadas à frente.</li>
+          <li>Abra os braços levando os <b>cotovelos pra trás/fora</b>, apertando o posterior do ombro.</li>
+          <li>Volte controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> usar dorsal (cotovelo indo pro quadril); dobrar muito o cotovelo.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- DIA 4 -->
+  <section class="panel" id="p-dia4" role="tabpanel" hidden>
+    <div class="daybar"><span class="n">Dia 4</span><h2>Perna (posterior) + Tríceps + Paralela + Lombar</h2></div>
+
+    <article class="ex" data-id="d4e1">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Paralela (dip) <span class="badge">Força</span></h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × prog.</span></span><span class="chip"><span class="k">RIR</span><span class="v">2–3</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barras paralelas.</p>
+        <ol class="ex__steps">
+          <li>Apoie as mãos, braços esticados sustentando o corpo; tronco levemente à frente.</li>
+          <li>Desça devagar até o braço passar de 90°.</li>
+          <li>Empurre de volta até quase esticar.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> parcial curta; ombro subindo.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e2">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Levantamento terra romeno (RDL)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 6–10</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Barra (ou 2 halteres).</p>
+        <ol class="ex__steps">
+          <li>Em pé, barra à frente das coxas, pegada pronada na largura dos ombros, joelhos <b>levemente flexionados e fixos</b>.</li>
+          <li>Empurre o <b>quadril pra trás</b>, descendo a barra <b>rente à perna</b>, coluna neutra.</li>
+          <li>Desça até sentir o <b>alongamento</b> no posterior da coxa (barra ~meio da canela).</li>
+          <li>Suba empurrando o quadril à frente até ficar ereto.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> arredondar a lombar; dobrar muito o joelho (vira agachamento); afastar a barra do corpo.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e3">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Cadeira flexora <b>sentada</b></h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 10–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Cadeira flexora <b>sentada</b> (a versão em que você fica sentado — não a deitada).</p>
+        <ol class="ex__steps">
+          <li>Sente, costas no encosto; a almofada trava sobre as coxas, a panturrilha fica sobre o rolo (quadril flexionado).</li>
+          <li>Flexione os joelhos <b>puxando o rolo pra baixo</b> ao máximo; aperte 1 s.</li>
+          <li>Volte controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> quadril saindo do apoio; amplitude curta.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e4">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Tríceps testa (skullcrusher) — barra W</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">75 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco reto + barra W. <b>Trocou a extensão overhead</b> (que dava dor no ombro): mesma cabeça longa, ombro neutro.</p>
+        <ol class="ex__steps">
+          <li>Deite, segure a barra W na largura dos ombros, braços esticados sobre o peito, inclinados um pouco <b>pra trás</b>.</li>
+          <li>Dobre <b>só os cotovelos</b>, descendo a barra à testa e um pouco <b>atrás da cabeça</b> (alonga a cabeça longa).</li>
+          <li>Cotovelos <b>fixos</b> apontando pra frente — só o antebraço se move.</li>
+          <li>Estenda de volta; controle a descida buscando o alongamento.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelos abrindo; mexer o ombro; bater a barra na testa.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e5">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Supino fechado (close-grip)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">90 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco reto + barra (reta ou W). Composto pesado pra massa do tríceps.</p>
+        <ol class="ex__steps">
+          <li>Deite, pegada na <b>largura dos ombros</b> (não precisa colar as mãos).</li>
+          <li>Desça a barra à parte baixa do peito com os <b>cotovelos perto do corpo</b> (não abertos).</li>
+          <li>Empurre pra cima focando em "empurrar com o tríceps".</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> pegada estreita demais (dói o punho/ombro); cotovelos abrindo pros lados.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e6">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Panturrilha sentado</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 12–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Máquina de panturrilha sentado.</p>
+        <ol class="ex__steps">
+          <li>Sente, ponta dos pés na plataforma, almofada sobre as coxas.</li>
+          <li>Desça o calcanhar até <b>alongar</b> (pausa 1 s); suba na ponta.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> quicar; amplitude curta.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d4e7">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Extensão de lombar (back extension)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">90 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco de hiperextensão (romana). <b>2ª vez na semana</b> — como o Dia 4 já tem RDL (que puxa muito o eretor), mantenha aqui mais <b>controlada e em reps altas</b>. Se a lombar acumular fadiga, mova esta dose pro Dia 5.</p>
+        <ol class="ex__steps">
+          <li>Apoio das coxas <b>logo abaixo do quadril</b>; tornozelos travados sob os rolos.</li>
+          <li>Braços cruzados no peito (ou segurando anilha).</li>
+          <li>Desça dobrando o <b>quadril</b> (não force a lombar) até alongar atrás.</li>
+          <li>Suba até alinhar o tronco às pernas; em cima, <b>aperte glúteo e abdômen</b>.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> hiperestender a lombar com força; usar impulso.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- DIA 5 -->
+  <section class="panel" id="p-dia5" role="tabpanel" hidden>
+    <div class="daybar"><span class="n">Dia 5</span><h2>Peito + Costas + Ombro + Braços <span class="sub">(pump)</span></h2></div>
+
+    <article class="ex" data-id="d5e1">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Supino reto c/ halteres</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 6–10</span></span><span class="chip"><span class="k">RIR</span><span class="v">1–2</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2–3 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Banco reto + 2 halteres.</p>
+        <ol class="ex__steps">
+          <li>Deite, halteres na altura do peito, cotovelos a <b>~45°</b> do tronco.</li>
+          <li>Desça buscando o <b>alongamento</b> (sem forçar o ombro).</li>
+          <li>Empurre pra cima controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelos a 90°; descer pouco.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d5e2">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Puxada alta (pulldown)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">4 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">2 min</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Máquina de puxada (pulley alto) + barra.</p>
+        <ol class="ex__steps">
+          <li>Sente, coxas sob o apoio, segure a barra <b>mais aberta</b> que os ombros.</li>
+          <li>No topo, deixe os ombros <b>subirem um pouco</b> (alonga o dorsal).</li>
+          <li>Puxe a barra até a <b>parte alta do peito</b>, cotovelos pra baixo, peito estufado.</li>
+          <li>Volte controlado até o alongamento.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> puxar atrás da nuca; usar balanço do tronco.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d5e3">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Remada baixa no cabo</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 10–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">90 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia baixa (remada sentada) + triângulo.</p>
+        <ol class="ex__steps">
+          <li>Sente, pés apoiados, segure o triângulo, <b>tronco ereto e firme</b>.</li>
+          <li>Puxe ao abdômen levando os cotovelos pra trás, apertando as escápulas.</li>
+          <li>Volte controlado deixando <b>alongar</b> à frente (sem curvar demais as costas).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> reclinar o tronco pra puxar; arredondar as costas.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d5e4">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Desenvolvimento halteres/máquina</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 8–12</span></span><span class="chip"><span class="k">RIR</span><span class="v">1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">90 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> 2 halteres (sentado com encosto) ou máquina de desenvolvimento.</p>
+        <ol class="ex__steps">
+          <li>Sentado, halteres na altura das <b>orelhas</b>, palmas pra frente.</li>
+          <li>Empurre pra cima até quase esticar (sem travar).</li>
+          <li>Desça controlado até ~a orelha (alongamento do deltoide).</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> amplitude curta; arquear demais a lombar.</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d5e5">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name"><span class="star">★</span> Rosca no cabo atrás do corpo (Bayesian)</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 10–15</span></span><span class="chip"><span class="k">RIR</span><span class="v">0–1</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia baixa + estribo.</p>
+        <ol class="ex__steps">
+          <li>Segure o estribo e dê um <b>passo à frente</b> da polia, de forma que o braço fique <b>atrás</b> da linha do corpo (alongado).</li>
+          <li>Cotovelo fixo; suba o estribo dobrando o cotovelo, <b>sem</b> trazer o cotovelo pra frente.</li>
+          <li>Aperte; desça controlado até o alongamento.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelo vir à frente; passo curto (perde o alongamento).</p>
+      </div>
+    </article>
+
+    <article class="ex" data-id="d5e6">
+      <div class="ex__head"><button class="ex__check" aria-label="Marcar como feito"></button><h4 class="ex__name">Tríceps corda / pushdown</h4></div>
+      <div class="ex__meta"><span class="chip"><span class="k">Séries × Reps</span><span class="v">3 × 12–20</span></span><span class="chip"><span class="k">RIR</span><span class="v">0</span></span><span class="chip"><span class="k">Descanso</span><span class="v">60 s</span></span></div>
+      <div class="ex__body">
+        <p class="ex__setup"><span class="lbl">Aparelho</span> Polia alta com corda.</p>
+        <ol class="ex__steps">
+          <li>Cotovelos colados ao corpo; empurre a corda pra baixo estendendo o cotovelo.</li>
+          <li>Afaste as pontas da corda no fim; volte controlado.</li>
+        </ol>
+        <p class="ex__err"><span class="lbl lbl--err">Evite</span> cotovelo saindo do corpo.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- PROGRESSÃO -->
+  <section class="panel prog" id="p-prog" role="tabpanel" hidden>
+    <h2>Escada de progressão — Barra e Paralela</h2>
+    <p>Objetivo: fazer barra e paralela <b>sem peso</b>. Pratique fresco, no início do treino, 2–3 RIR (nunca à falha). Suba um degrau por vez (o que cada termo significa está no <b>Glossário</b>).</p>
+    <div class="ladder">
+      <h3>Barra <span class="t">chin / pull-up</span></h3>
+      <ol class="steps"><li>Dead hang 20–40 s</li><li>Scapular pulls 8–12</li><li>Negativas (desce 3–5 s) 4–6</li><li>Assistida (elástico ou gráviton)</li><li>Parciais / singles</li><li>Reps completas → peso</li></ol>
+    </div>
+    <div class="ladder">
+      <h3>Paralela <span class="t">dip</span></h3>
+      <ol class="steps"><li>Apoio no topo 15–30 s</li><li>Dip no banco</li><li>Negativas (desce 3–5 s) 4–6</li><li>Assistida (elástico ou gráviton)</li><li>Parciais</li><li>Completas → peso</li></ol>
+    </div>
+    <p style="font-size:.85rem;color:var(--muted)">No <b>gráviton</b>, o peso da pilha é <b>ajuda</b> (mais peso = mais fácil). Pra progredir, vá <b>tirando</b> peso até conseguir sem assistência.</p>
+  </section>
+
+  <!-- GLOSSÁRIO -->
+  <section class="panel gloss" id="p-gloss" role="tabpanel" hidden>
+    <h2>Glossário — o que é cada termo</h2>
+    <p>Palavras em português simples.</p>
+    <h3 class="gloss__grp">Degraus da barra e da paralela</h3>
+    <dl class="terms">
+      <div class="term"><dt>Dead hang (pendurar)</dt><dd>Ficar só <b>pendurado</b> na barra, braços esticados, pés no ar, sem puxar. 20–40 s. Constrói <b>força de pegada</b>.</dd></div>
+      <div class="term"><dt>Scapular pulls</dt><dd>Pendurado, puxe <b>só as omoplatas</b> pra baixo, <b>sem dobrar o cotovelo</b>. O corpo sobe 2–3 cm. Liga os músculos que iniciam a puxada.</dd></div>
+      <div class="term"><dt>Negativas</dt><dd>Começa <b>no topo</b> (com pulo/step) e <b>desce bem devagar (3–5 s)</b>. Só a descida. É o degrau que mais acelera.</dd></div>
+      <div class="term"><dt>Assistida (elástico/gráviton)</dt><dd>Ajuda que <b>reduz</b> parte do seu peso. No gráviton, mais peso na pilha = mais ajuda. Vá reduzindo a ajuda com o tempo.</dd></div>
+      <div class="term"><dt>Parciais</dt><dd>Fazer só <b>parte</b> do movimento (ex: subir até a metade) quando não dá a amplitude toda.</dd></div>
+      <div class="term"><dt>Singles</dt><dd>Fazer <b>1 rep por vez</b>, descansar, fazer outra — acumula mais reps boas quando você só consegue 1–2.</dd></div>
+      <div class="term"><dt>Apoio no topo</dt><dd>Na paralela, ficar <b>parado em cima</b>, braços travados, sustentando o corpo (15–30 s).</dd></div>
+      <div class="term"><dt>Dip no banco</dt><dd>Versão fácil: mãos na <b>borda de um banco</b> atrás de você, pés no chão à frente.</dd></div>
+    </dl>
+    <h3 class="gloss__grp">Palavras da execução</h3>
+    <dl class="terms">
+      <div class="term"><dt>Escápula</dt><dd>A omoplata — o osso "asa" nas costas.</dd></div>
+      <div class="term"><dt>Fase excêntrica / alongamento</dt><dd>A <b>descida</b> do peso — a parte que você controla em 2–3 s.</dd></div>
+      <div class="term"><dt>Pico de contração</dt><dd><b>Apertar e segurar 1 s</b> no ponto de maior encurtamento (ex: no alto da rosca).</dd></div>
+      <div class="term"><dt>Pegada supinada / pronada / neutra</dt><dd>Supinada = palma pra você/cima · Pronada = palma pra fora/baixo · Neutra = palma pro corpo (polegar pra cima).</dd></div>
+      <div class="term"><dt>Cabeça longa do tríceps</dt><dd>A maior das 3 partes do tríceps (a que dá volume). É alongada em exercícios como a testa e a extensão.</dd></div>
+    </dl>
+    <footer class="foot">
+      <div class="row"><h3>Volume-alvo (braço)</h3><b>~15–18 séries diretas/semana</b> de bíceps e de tríceps.</div>
+      <div class="row"><h3>Recuperação</h3>Se cair (força despencando, sono ruim, dor persistente), <b>corte 1 acessório por dia</b> — mantenha os compostos e os <span class="star">★</span>.</div>
+      <div class="src">Evidência: long muscle length (meta-análise 2025) · Maeo 2022 · flexora sentada vs deitada · back extension (Strength Side / KOT). &nbsp;·&nbsp; <a href="#" id="reset" class="reset">Limpar marcações</a></div>
+    </footer>
+  </section>
+  </main>
+</div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var panels={};
+  tabs.forEach(function(t){panels[t.getAttribute('data-p')]=document.getElementById(t.getAttribute('data-p'));});
+  function show(id){
+    if(!panels[id])return;
+    tabs.forEach(function(t){var on=t.getAttribute('data-p')===id;t.classList.toggle('is-active',on);t.setAttribute('aria-selected',on?'true':'false');});
+    Object.keys(panels).forEach(function(k){panels[k].hidden=(k!==id);});
+    try{window.scrollTo(0,0);}catch(e){}
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.getAttribute('data-p'));});});
+  [].slice.call(document.querySelectorAll('.daycard')).forEach(function(c){
+    c.addEventListener('click',function(){show(c.getAttribute('data-go'));});
+  });
+  show('p-inicio');
+
+  var KEY='treino-braco-v3-done';
+  var done={};
+  try{done=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){done={};}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}}
+  var cards=[].slice.call(document.querySelectorAll('.ex'));
+  cards.forEach(function(ex){
+    var id=ex.getAttribute('data-id');
+    var btn=ex.querySelector('.ex__check');
+    if(done[id]){ex.classList.add('is-done');btn.setAttribute('aria-pressed','true');}
+    btn.addEventListener('click',function(){
+      var now=!ex.classList.contains('is-done');
+      ex.classList.toggle('is-done',now);
+      btn.setAttribute('aria-pressed',now?'true':'false');
+      if(now){done[id]=1;}else{delete done[id];}
+      save();
+    });
+  });
+  var reset=document.getElementById('reset');
+  if(reset){reset.addEventListener('click',function(e){
+    e.preventDefault();done={};save();
+    cards.forEach(function(ex){ex.classList.remove('is-done');var b=ex.querySelector('.ex__check');if(b)b.setAttribute('aria-pressed','false');});
+  });}
+})();
+</script>
